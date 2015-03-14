@@ -32,7 +32,12 @@
  'dialogger-key-speaker-alist)
 
 (defun dialogger-defspeaker (speaker key)
-  "Defines SPEAKER to be activated with KEY."
+  "Defines SPEAKER to be activated with KEY.
+If KEY is already present in `dialogger-key-speaker-alist', set
+the value stored to SPEAKER.  Otherwise, add \(SPEAKER . KEY\) to
+the alist.
+
+Returns the new `dialogger-key-speaker-alist'."
   (let ((keystr (help-key-description (vector key) nil)))
     (if (assoc keystr dialogger-key-speaker-alist)
         (setcdr (assoc keystr dialogger-key-speaker-alist)
@@ -40,21 +45,32 @@
       (add-to-list 'dialogger-key-speaker-alist
                    (cons keystr speaker)))))
 
-(defun dialogger--read-string (prompt)
-  (interactive)
-  (read-string prompt))
-(defun dialogger--read-char (prompt)
-  (interactive)
-  (read-char prompt))
 (defun dialogger--get-speaker-for-key (key)
+  "Retrieves the speaker for KEY.
+Returns a string."
   (cdr (assoc (help-key-description (vector key) nil)
               dialogger-key-speaker-alist)))
 
-(defun dialogger-new-speaker ()
-  "Define a new speaker interactively and updates file-local variables."
+(defun dialogger--read-speaker (prompt)
+  "Read a speaker's name, prompting with PROMPT.
+Returns the speaker's name."
   (interactive)
-  (let ((name (dialogger--read-string "[dialogger] Name: "))
-        (key (dialogger--read-char "[dialogger] Key:")))
+  (read-string prompt))
+
+(defun dialogger--read-key (prompt)
+  "Read a key, prompting with PROMPT.
+Returns the key code entered."
+  (interactive)
+  (read-char prompt))
+
+
+(defun dialogger-new-speaker ()
+  "Define a new speaker interactively.
+Also updates the file-local variable for
+`dialogger-key-speaker-alist'."
+  (interactive)
+  (let ((name (dialogger--read-speaker "[dialogger] Name: "))
+        (key (dialogger--read-key "[dialogger] Key:")))
     (dialogger-defspeaker name key)
     (dialogger-save-config)
     (message "Speaker `%s' is now \"%s\""
@@ -62,7 +78,10 @@
              name)))
 
 (defun dialogger-reset ()
-  "Revert the definition"
+  "Revert the speaker definition to the Local Variables value.
+This uses the same logic as `read-file-local-variable' and comes
+with all of its shortcomings.  It assumes the Local Variables
+section is at the end of the buffer."
   (interactive)
   (save-excursion
     (goto-char (point-max))
@@ -76,6 +95,9 @@
       (dialogger-save-config))))
 
 (defun dialogger-save-config ()
+  "Save `dialogger-key-speaker-alist' to Local Variables.
+When the file is opened again, all of the speakers will be
+available just as they were when the file was last used."
   (interactive)
   (save-excursion
     (add-file-local-variable
@@ -88,6 +110,10 @@ If TIME is nil, the current time is used."
   (format "- [%s] %s :: " (format-time-string "%FT%T" time) speaker))
 
 (defun dialogger-log (arg)
+  "Log a speaker.
+Starts a new line under current point and inserts
+`dialogger-format' output.  With a prefix argument, force
+appending to the bottom of a list."
   (interactive "P")
   (let*  ((key (read-char "Speaker? (`&' to create)"))
           (speaker (dialogger--get-speaker-for-key key))
@@ -106,7 +132,8 @@ If TIME is nil, the current time is used."
                    keystr speaker)))))
 
 (defun dialogger-org-log ()
-  "Checks context and acts appropriately."
+  "If point is on a log line, insert a new log.
+Otherwise, return nil."
   (when (save-excursion
           (beginning-of-line)
           (looking-at-p
