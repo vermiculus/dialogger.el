@@ -26,14 +26,19 @@
 
 ;;; Code:
 
-(defvar dialogger-key-speaker-map (make-hash-table)
-  "Hashmap of keys to speakers.")
+(defvar dialogger-key-speaker-alist nil
+  "Alist mapping keys to speakers.")
 (make-variable-buffer-local
- 'dialogger-key-speaker-map)
+ 'dialogger-key-speaker-alist)
 
 (defun dialogger-defspeaker (speaker key)
   "Defines SPEAKER to be activated with KEY."
-  (puthash key speaker dialogger-key-speaker-map))
+  (let ((keystr (help-key-description (vector key) nil)))
+    (if (assoc keystr dialogger-key-speaker-alist)
+        (setcdr (assoc keystr dialogger-key-speaker-alist)
+                speaker)
+      (add-to-list 'dialogger-key-speaker-alist
+                   (cons keystr speaker)))))
 
 (defun dialogger--read-string (prompt)
   (interactive)
@@ -41,6 +46,9 @@
 (defun dialogger--read-char (prompt)
   (interactive)
   (read-char prompt))
+(defun dialogger--get-speaker-for-key (key)
+  (cdr (assoc (help-key-description (vector key) nil)
+              dialogger-key-speaker-alist)))
 
 (defun dialogger-new-speaker ()
   "Define a new speaker interactively and updates file-local variables."
@@ -57,8 +65,8 @@
   (interactive)
   (save-excursion
     (add-file-local-variable
-     'dialogger-key-speaker-map
-     dialogger-key-speaker-map)))
+     'dialogger-key-speaker-alist
+     dialogger-key-speaker-alist)))
 
 (defun dialogger-format (speaker &optional time)
   "Return a formatted string for SPEAKER speaking at TIME.
@@ -68,7 +76,7 @@ If TIME is nil, the current time is used."
 (defun dialogger-log (arg)
   (interactive "P")
   (let*  ((key (read-char "Speaker? (`&' to create)"))
-          (speaker (gethash key dialogger-key-speaker-map))
+          (speaker (dialogger--get-speaker-for-key key))
           (keystr (help-key-description (vector key) nil)))
     (if (= key ?&)
         (dialogger-new-speaker)
