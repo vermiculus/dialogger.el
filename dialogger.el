@@ -61,6 +61,20 @@
              (help-key-description (vector key) nil)
              name)))
 
+(defun dialogger-reset ()
+  "Revert the definition"
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (let ((case-fold-search t))
+      (search-backward "Local Variables:" (max (- (point-max) 3000) (point-min)) t))
+    (if (search-forward "dialogger-key-speaker-alist: " nil t)
+        (setq dialogger-key-speaker-alist
+              (read
+               (buffer-substring-no-properties
+                (point) (save-excursion (end-of-line) (point)))))
+      (dialogger-save-config))))
+
 (defun dialogger-save-config ()
   (interactive)
   (save-excursion
