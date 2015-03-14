@@ -1,0 +1,20 @@
+#+Title: Dialog Transcription Support for Emacs
+#+Author: Sean Allred
+
+This package introduces basic transcription support in Emacs.
+~dialogger-log~ is the basic entry point into the package, however,
+~dialogger-org-log~ is added to ~org-ctrl-c-ctrl-c-hook~ and
+recognizes when it is on a log line.  If it is, it runs
+~dialogger-log~.  If you're in an Org file, this provides a fluid
+interface for both adding speakers and adding dialog.
+
+Suppose point is anywhere on a line that looks like
+#+BEGIN_SRC org
+- [2015-03-14T10:51:18] Sean Allred :: Dialogger is pretty useful!
+#+END_SRC
+If you press =C-c C-c=, ~dialogger-org-log~ will recognize the line
+and prompt you for a speaker as you would expect.
+
+I recommend adding speakers as control-keys (as opposed to 'normal'
+keys).  This way, you can just hold down control while you input the
+sequence =c c s=, for example.  Quick and efficient logging.
