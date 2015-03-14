@@ -73,13 +73,15 @@ Returns the key code entered."
 Also updates the file-local variable for
 `dialogger-key-speaker-alist'."
   (interactive)
-  (let ((name (dialogger--read-speaker "[dialogger] Name: "))
-        (key (dialogger--read-key "[dialogger] Key:")))
+  (let* ((key (dialogger--read-key "[dialogger] Key:"))
+         (keystr (help-key-description (vector key) nil))
+         (name (dialogger--read-speaker
+                (format
+                 "[dialogger] Bind `%s' to Name: "
+                 keystr))))
     (dialogger-defspeaker name key)
     (dialogger-save-config)
-    (message "Speaker `%s' is now \"%s\""
-             (help-key-description (vector key) nil)
-             name)))
+    (message "Speaker `%s' is now \"%s\"" keystr name)))
 
 (defun dialogger-reset ()
   "Revert the speaker definition to the Local Variables value.
