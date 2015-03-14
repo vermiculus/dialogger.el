@@ -24,6 +24,10 @@
 ;; checking out `transcription-mode' for audio control.  Hooks into
 ;; Org's C-c C-c handler for easy input.
 
+;; Recommend binding `dialogger-log' to C-c M-l:
+
+;; (global-set-key (kbd "C-c M-l") #'dialogger-log)
+
 ;;; Code:
 
 (defvar dialogger-key-speaker-alist nil
