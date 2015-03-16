@@ -151,7 +151,8 @@ Otherwise, return nil."
   (when (save-excursion
           (beginning-of-line)
           (looking-at-p
-           (rx line-start "- ["
+           (rx line-start
+               (* whitespace) "- ["
                (repeat 4 digit) "-"
                (repeat 2 digit) "-"
                (repeat 2 digit)
