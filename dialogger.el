@@ -33,6 +33,8 @@
 
 ;;; Code:
 
+
+;;; Keeping State
 (defvar dialogger-key-speaker-alist nil
   "Alist mapping keys to speakers.")
 (make-variable-buffer-local
@@ -70,21 +72,15 @@ Returns the key code entered."
   (interactive)
   (read-char prompt))
 
-
-(defun dialogger-new-speaker ()
-  "Define a new speaker interactively.
-Also updates the file-local variable for
-`dialogger-key-speaker-alist'."
+(defun dialogger-save-config ()
+  "Save `dialogger-key-speaker-alist' to Local Variables.
+When the file is opened again, all of the speakers will be
+available just as they were when the file was last used."
   (interactive)
-  (let* ((key (dialogger--read-key "[dialogger] Key:"))
-         (keystr (help-key-description (vector key) nil))
-         (name (dialogger--read-speaker
-                (format
-                 "[dialogger] Bind `%s' to Name: "
-                 keystr))))
-    (dialogger-defspeaker name key)
-    (dialogger-save-config)
-    (message "Speaker `%s' is now \"%s\"" keystr name)))
+  (save-excursion
+    (add-file-local-variable
+     'dialogger-key-speaker-alist
+     dialogger-key-speaker-alist)))
 
 (defun dialogger-reset ()
   "Revert the speaker definition to the Local Variables value.
@@ -103,16 +99,25 @@ section is at the end of the buffer."
                 (point) (save-excursion (end-of-line) (point)))))
       (dialogger-save-config))))
 
-(defun dialogger-save-config ()
-  "Save `dialogger-key-speaker-alist' to Local Variables.
-When the file is opened again, all of the speakers will be
-available just as they were when the file was last used."
+
+;;; On-The-Fly Configuration
+(defun dialogger-new-speaker ()
+  "Define a new speaker interactively.
+Also updates the file-local variable for
+`dialogger-key-speaker-alist'."
   (interactive)
-  (save-excursion
-    (add-file-local-variable
-     'dialogger-key-speaker-alist
-     dialogger-key-speaker-alist)))
+  (let* ((key (dialogger--read-key "[dialogger] Key:"))
+         (keystr (help-key-description (vector key) nil))
+         (name (dialogger--read-speaker
+                (format
+                 "[dialogger] Bind `%s' to Name: "
+                 keystr))))
+    (dialogger-defspeaker name key)
+    (dialogger-save-config)
+    (message "Speaker `%s' is now \"%s\"" keystr name)))
 
+
+;;; Writing Logs
 (defun dialogger-format (speaker &optional time)
   "Return a formatted string for SPEAKER speaking at TIME.
 If TIME is nil, the current time is used."
