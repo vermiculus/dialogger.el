@@ -25,8 +25,11 @@
 ;; Org's C-c C-c handler for easy input.
 
 ;; Recommend binding `dialogger-log' to C-c M-l:
-
-;; (global-set-key (kbd "C-c M-l") #'dialogger-log)
+;;
+;;     (global-set-key (kbd "C-c M-l") #'dialogger-log)
+;;
+;; Once there is a log line to use, Org's C-c C-c will be able to
+;; catch it.
 
 ;;; Code:
 
